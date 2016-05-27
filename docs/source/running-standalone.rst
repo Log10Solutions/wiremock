@@ -43,7 +43,7 @@ Force clients to authenticate with a client certificate. See :ref:`https` for de
 Turn on verbose logging to stdout
 
 ``--root-dir``:
-Sets the root directory, under which ``mappings`` and ``__files`` reside. This defaults to the current directory.
+Sets the root directory, under which ``expectation`` and ``expectationBody`` reside. This defaults to the current directory.
 
 ``--record-mappings``:
 Record incoming requests as stub mappings. See :ref:`record-playback`.
@@ -100,8 +100,8 @@ Show command line help
 File serving
 ------------
 
-When running standalone files placed under the ``__files`` directory will be served up as if from under the docroot,
-except if stub mapping matching the URL exists. For example if a file exists ``__files/things/myfile.html`` and
+When running standalone files placed under the ``expectationBody`` directory will be served up as if from under the docroot,
+except if stub mapping matching the URL exists. For example if a file exists ``expectationBody/things/myfile.html`` and
 no stub mapping will match ``/things/myfile.html`` then hitting ``http://<host>:<port>/things/myfile.html`` will
 serve the file.
 
@@ -124,9 +124,9 @@ Then fetching it back:
 
 
 You can also use the JSON API via files. When the WireMock server starts it creates two directories under the current one:
-``mappings`` and ``__files``.
+``expectation`` and ``expectationBody``.
 
-To create a stub like the one above by this method, drop a file with a ``.json`` extension under ``mappings``
+To create a stub like the one above by this method, drop a file with a ``.json`` extension under ``expectation``
 with the following content:
 
 .. code-block:: javascript

@@ -37,7 +37,7 @@ matches ``/some/thing`` (including query parameters). The body of the response w
 
 To create the stub described above via the JSON API, the following document can either be posted to
 ``http://<host>:<port>/__admin/mappings/new`` or placed in a file with a ``.json`` extension under the
-``mappings`` directory:
+``expectation`` directory:
 
 .. code-block:: javascript
 
@@ -488,10 +488,10 @@ Or
     }
 
 
-To read the body content from a file, place the file under the ``__files`` directory. By default this is expected to
+To read the body content from a file, place the file under the ``expectationBody`` directory. By default this is expected to
 be under ``src/test/resources`` when running from the JUnit rule. When running standalone it will be under the current
 directory in which the server was started. To make your stub use the file, simply call ``bodyFile()`` on the response
-builder with the file's path relative to ``__files``:
+builder with the file's path relative to ``expectationBody``:
 
 .. code-block:: java
 
@@ -548,7 +548,7 @@ The JSON API accepts this as a base64 string (to avoid stupidly long JSON docume
 Saving stubs
 ============
 
-Stub mappings which have been created can be persisted to the ``mappings`` directory via a call to ``WireMock.saveAllMappings``
+Stub mappings which have been created can be persisted to the ``expectation`` directory via a call to ``WireMock.saveAllMappings``
 in Java or posting a request with an empty body to ``http://<host>:<port>/__admin/mappings/save``.
 
 Note that this feature is not available when running WireMock from a servlet container.

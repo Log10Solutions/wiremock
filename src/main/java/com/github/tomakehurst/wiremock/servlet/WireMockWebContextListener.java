@@ -35,7 +35,7 @@ import static com.google.common.base.Optional.fromNullable;
 
 public class WireMockWebContextListener implements ServletContextListener {
 
-    private static final String FILES_ROOT = "__files";
+    private static final String FILES_ROOT = "expectationBody";
     private static final String APP_CONTEXT_KEY = "WireMockApp";
     private static final String FILE_SOURCE_ROOT_KEY = "WireMockFileSourceRoot";
 
@@ -51,7 +51,7 @@ public class WireMockWebContextListener implements ServletContextListener {
                 fromNullable(context.getInitParameter("verboseLoggingEnabled"))
                         .or("true"));
 
-        JsonFileMappingsLoader defaultMappingsLoader = new JsonFileMappingsLoader(fileSource.child("mappings"));
+        JsonFileMappingsLoader defaultMappingsLoader = new JsonFileMappingsLoader(fileSource.child("expectation"));
         MappingsSaver mappingsSaver = new NotImplementedMappingsSaver();
         WireMockApp wireMockApp = new WireMockApp(
                 new NotImplementedRequestDelayControl(),

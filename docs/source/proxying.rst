@@ -105,7 +105,7 @@ It is possible to start the standalone running with the catch-all stub already c
 
     $ java -jar wiremock-|version|-standalone.jar --proxy-all="http://someotherhost.com"
 
-Then it's simply a case of adding your stub mapping ``.json`` files under ``mappings`` as usual (see :ref:`stubbing`).
+Then it's simply a case of adding your stub mapping ``.json`` files under ``expectation`` as usual (see :ref:`stubbing`).
 
 
 .. _browser-proxying:

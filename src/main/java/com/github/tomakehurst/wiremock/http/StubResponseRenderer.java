@@ -57,7 +57,14 @@ public class StubResponseRenderer implements ResponseRenderer {
                 .fault(responseDefinition.getFault());
 
 		if (responseDefinition.specifiesBodyFile()) {
-			BinaryFile bodyFile = fileSource.getBinaryFileNamed(responseDefinition.getBodyFileName());
+			FileSource bodyFolderHACK = fileSource.child("..").child("..").child("..").child("expectationForRecordBody");
+			BinaryFile bodyFile = null;
+			if (bodyFolderHACK.exists()) {
+				bodyFile = bodyFolderHACK.getBinaryFileNamed(responseDefinition.getBodyFileName());
+			} else {
+				bodyFile = fileSource.getBinaryFileNamed(responseDefinition.getBodyFileName());
+			}
+			
             responseBuilder.body(bodyFile.readContents());
 		} else if (responseDefinition.specifiesBodyContent()) {
             if(responseDefinition.specifiesBinaryBodyContent()) {

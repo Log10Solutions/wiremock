@@ -32,8 +32,8 @@ import static org.junit.Assert.assertThat;
 
 public class SavingMappingsAcceptanceTest extends AcceptanceTestBase {
     private static final File FILE_SOURCE_ROOT = new File("build/save-mappings-files");
-    private static final File FILES_DIRECTORY = new File(FILE_SOURCE_ROOT, "__files");
-    private static final File MAPPINGS_DIRECTORY = new File(FILE_SOURCE_ROOT, "mappings");
+    private static final File FILES_DIRECTORY = new File(FILE_SOURCE_ROOT, "expectationBody");
+    private static final File MAPPINGS_DIRECTORY = new File(FILE_SOURCE_ROOT, "expectation");
 
     private static void resetFileSourceRoot() {
         try {

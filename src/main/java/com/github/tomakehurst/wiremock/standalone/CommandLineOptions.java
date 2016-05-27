@@ -21,6 +21,8 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.*;
@@ -35,9 +37,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.io.Resources;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-
 import static com.github.tomakehurst.wiremock.common.ProxySettings.*;
 import static com.github.tomakehurst.wiremock.http.CaseInsensitiveKey.*;
 
@@ -291,9 +293,8 @@ public class CommandLineOptions implements Options {
         return DEFAULT_CONTAINER_THREADS;
     }
 
-    @Override
-    public String toString() {
-        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+    public Set<Entry<String, Object>> getOptionsUsed() {
+    	ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
         builder.put(PORT, portNumber());
 
         if (httpsSettings().enabled()) {
@@ -330,9 +331,32 @@ public class CommandLineOptions implements Options {
         if (jettySettings().getRequestHeaderSize().isPresent()) {
             builder.put(JETTY_HEADER_BUFFER_SIZE, jettySettings().getRequestHeaderSize().get());
         }
-
+        
+        return builder.build().entrySet();
+    }
+    
+    public String toStringInline() {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Object> param: builder.build().entrySet()) {
+        sb.append("{");
+        for (Map.Entry<String, Object> param: getOptionsUsed()) {
+            sb.append("{")
+            	.append(param.getKey())
+                    .append(":")
+                    .append(nullToString(param.getValue()))
+                    .append("}, ");
+        }
+        if (sb.length() > 1) {
+        	sb.setLength(sb.length() - 2);
+        }
+        sb.append("}");
+
+        return sb.toString();
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Object> param: getOptionsUsed()) {
             int paddingLength = 29 - param.getKey().length();
             sb.append(param.getKey())
                     .append(":")

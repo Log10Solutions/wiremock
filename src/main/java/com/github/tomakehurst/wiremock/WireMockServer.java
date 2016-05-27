@@ -52,8 +52,8 @@ import static com.google.common.base.Preconditions.checkState;
 
 public class WireMockServer implements Container, Stubbing, Admin {
 
-	public static final String FILES_ROOT = "__files";
-    public static final String MAPPINGS_ROOT = "mappings";
+	public static final String FILES_ROOT = "expectationBody";
+    public static final String MAPPINGS_ROOT = "expectation";
 
 	private final WireMockApp wireMockApp;
     private final StubRequestHandler stubRequestHandler;
@@ -118,7 +118,7 @@ public class WireMockServer implements Container, Stubbing, Admin {
     }
 
     private MappingsLoader makeDefaultMappingsLoader() {
-        FileSource mappingsFileSource = fileSource.child("mappings");
+        FileSource mappingsFileSource = fileSource.child("expectation");
         if (mappingsFileSource.exists()) {
             return new JsonFileMappingsLoader(mappingsFileSource);
         } else {

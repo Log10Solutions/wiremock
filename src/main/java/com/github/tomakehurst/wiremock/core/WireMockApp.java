@@ -38,7 +38,7 @@ import java.util.Map;
 
 public class WireMockApp implements StubServer, Admin {
     
-    public static final String FILES_ROOT = "__files";
+    public static final String FILES_ROOT = "expectationBody";
     public static final String ADMIN_CONTEXT_ROOT = "/__admin";
 
     private final StubMappings stubMappings;

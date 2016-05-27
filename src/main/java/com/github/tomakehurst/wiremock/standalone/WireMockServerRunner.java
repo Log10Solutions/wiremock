@@ -15,6 +15,9 @@
  */
 package com.github.tomakehurst.wiremock.standalone;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.FatalStartupException;
 import com.github.tomakehurst.wiremock.common.FileSource;
@@ -29,21 +32,14 @@ import static com.github.tomakehurst.wiremock.http.RequestMethod.ANY;
 import static java.lang.System.out;
 
 public class WireMockServerRunner {
-
-    private static final String BANNER = " /$$      /$$ /$$                     /$$      /$$                     /$$      \n" +
-            "| $$  /$ | $$|__/                    | $$$    /$$$                    | $$      \n" +
-            "| $$ /$$$| $$ /$$  /$$$$$$   /$$$$$$ | $$$$  /$$$$  /$$$$$$   /$$$$$$$| $$   /$$\n" +
-            "| $$/$$ $$ $$| $$ /$$__  $$ /$$__  $$| $$ $$/$$ $$ /$$__  $$ /$$_____/| $$  /$$/\n" +
-            "| $$$$_  $$$$| $$| $$  \\__/| $$$$$$$$| $$  $$$| $$| $$  \\ $$| $$      | $$$$$$/ \n" +
-            "| $$$/ \\  $$$| $$| $$      | $$_____/| $$\\  $ | $$| $$  | $$| $$      | $$_  $$ \n" +
-            "| $$/   \\  $$| $$| $$      |  $$$$$$$| $$ \\/  | $$|  $$$$$$/|  $$$$$$$| $$ \\  $$\n" +
-            "|__/     \\__/|__/|__/       \\_______/|__/     |__/ \\______/  \\_______/|__/  \\__/";
+	public static final Logger LOG = LoggerFactory.getLogger(WireMockServerRunner.class);
 
     static {
         System.setProperty("org.mortbay.log.class", "com.github.tomakehurst.wiremock.jetty.LoggerAdapter");
     }
 
 	private WireMockServer wireMockServer;
+
 	
 	public void run(String... args) {
 		CommandLineOptions options = new CommandLineOptions(args);
@@ -71,9 +67,7 @@ public class WireMockServerRunner {
 
         try {
             wireMockServer.start();
-            out.println(BANNER);
-            out.println();
-            out.println(options);
+            LOG.debug("Wiremock options: " + options.toStringInline());
         } catch (FatalStartupException e) {
             System.err.println(e.getMessage());
             System.exit(1);

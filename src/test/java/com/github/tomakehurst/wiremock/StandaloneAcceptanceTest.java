@@ -56,8 +56,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class StandaloneAcceptanceTest {
-	private static final String FILES = "__files";
-	private static final String MAPPINGS = "mappings";
+	private static final String FILES = "expectationBody";
+	private static final String MAPPINGS = "expectation";
 
     private static final File FILE_SOURCE_ROOT = new File("build/standalone-files");
 
