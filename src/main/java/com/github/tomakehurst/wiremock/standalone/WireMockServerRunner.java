@@ -41,7 +41,7 @@ public class WireMockServerRunner {
 	private WireMockServer wireMockServer;
 
 	
-	public void run(String... args) {
+	public void run(String... args) throws FatalStartupException {
 		CommandLineOptions options = new CommandLineOptions(args);
 		if (options.help()) {
 			out.println(options.helpText());
@@ -65,13 +65,8 @@ public class WireMockServerRunner {
 			addProxyMapping(options.proxyUrl());
 		}
 
-        try {
-            wireMockServer.start();
-            LOG.debug("Wiremock options: " + options.toStringInline());
-        } catch (FatalStartupException e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
-        }
+        wireMockServer.start(); //throw com.github.tomakehurst.wiremock.common.FatalStartupException
+        LOG.debug("Wiremock options: " + options.toStringInline());
     }
 	
 	private void addProxyMapping(final String baseUrl) {
