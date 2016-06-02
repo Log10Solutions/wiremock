@@ -27,6 +27,8 @@ public class StubResponseRenderer implements ResponseRenderer {
 	private final FileSource fileSource;
 	private final GlobalSettingsHolder globalSettingsHolder;
 	private final ProxyResponseRenderer proxyResponseRenderer;
+	private final FileSource extraFolder;
+	private final FileSource extraFolder2;
 
     public StubResponseRenderer(FileSource fileSource,
                                 GlobalSettingsHolder globalSettingsHolder,
@@ -34,7 +36,32 @@ public class StubResponseRenderer implements ResponseRenderer {
         this.fileSource = fileSource;
         this.globalSettingsHolder = globalSettingsHolder;
         this.proxyResponseRenderer = proxyResponseRenderer;
+        this.extraFolder = null;
+        this.extraFolder2 = null;
     }
+    
+    public StubResponseRenderer(FileSource fileSource,
+					            GlobalSettingsHolder globalSettingsHolder,
+					            ProxyResponseRenderer proxyResponseRenderer,
+					            FileSource extraFolder) {
+		this.fileSource = fileSource;
+		this.globalSettingsHolder = globalSettingsHolder;
+		this.proxyResponseRenderer = proxyResponseRenderer;
+		this.extraFolder = extraFolder;
+        this.extraFolder2 = null;
+	}
+    
+    public StubResponseRenderer(FileSource fileSource,
+					            GlobalSettingsHolder globalSettingsHolder,
+					            ProxyResponseRenderer proxyResponseRenderer,
+					            FileSource extraFolder,
+					            FileSource extraFolder2) {
+		this.fileSource = fileSource;
+		this.globalSettingsHolder = globalSettingsHolder;
+		this.proxyResponseRenderer = proxyResponseRenderer;
+		this.extraFolder = extraFolder;
+		this.extraFolder2 = extraFolder2;
+	}
 
 	@Override
 	public Response render(ResponseDefinition responseDefinition) {
@@ -57,15 +84,39 @@ public class StubResponseRenderer implements ResponseRenderer {
                 .fault(responseDefinition.getFault());
 
 		if (responseDefinition.specifiesBodyFile()) {
-			FileSource bodyFolderHACK = fileSource.child("..").child("..").child("..").child("expectationForRecordBody");
-			BinaryFile bodyFile = null;
-			if (bodyFolderHACK.exists()) {
-				bodyFile = bodyFolderHACK.getBinaryFileNamed(responseDefinition.getBodyFileName());
-			} else {
-				bodyFile = fileSource.getBinaryFileNamed(responseDefinition.getBodyFileName());
+			byte[] bodyContent = null;
+			boolean bodyContentRead = false;
+			if (extraFolder2 != null) {
+				try {
+					BinaryFile bodyFile = extraFolder2.getBinaryFileNamed(responseDefinition.getBodyFileName());
+					bodyContent = bodyFile.readContents();
+					bodyContentRead = true;
+				} catch (Exception e) {
+					//Impossible to reach the file in the extra folder
+				}
+			}
+			if (!bodyContentRead && extraFolder != null) {
+				try {
+					BinaryFile bodyFile = extraFolder.getBinaryFileNamed(responseDefinition.getBodyFileName());
+					bodyContent = bodyFile.readContents();
+					bodyContentRead = true;
+				} catch (Exception e) {
+					//Impossible to reach the file in the extra folder
+				}
+			}
+			if (!bodyContentRead) {
+				FileSource bodyFolderHACK = fileSource.child("..").child("..").child("..").child("expectationForRecordBody");
+				if (bodyFolderHACK.exists()) {
+					BinaryFile bodyFile = bodyFolderHACK.getBinaryFileNamed(responseDefinition.getBodyFileName());
+					bodyContent = bodyFile.readContents();
+				} else {
+					BinaryFile bodyFile = fileSource.getBinaryFileNamed(responseDefinition.getBodyFileName());
+					bodyContent = bodyFile.readContents();
+				}
+				bodyContentRead = true;
 			}
 			
-            responseBuilder.body(bodyFile.readContents());
+            responseBuilder.body(bodyContent);
 		} else if (responseDefinition.specifiesBodyContent()) {
             if(responseDefinition.specifiesBinaryBodyContent()) {
                 responseBuilder.body(responseDefinition.getByteBody());

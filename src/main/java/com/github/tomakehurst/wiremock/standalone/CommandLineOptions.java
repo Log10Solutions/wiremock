@@ -68,6 +68,8 @@ public class CommandLineOptions implements Options {
     private static final String JETTY_ACCEPT_QUEUE_SIZE = "jetty-accept-queue-size";
     private static final String JETTY_HEADER_BUFFER_SIZE = "jetty-header-buffer-size";
     private static final String ROOT_DIR = "root-dir";
+    private static final String EXTRA_BODIES_FOLDER = "extra-bodies-folder";
+    private static final String EXTRA_BODIES_FOLDER_2 = "extra-bodies-folder-2";
     private static final String CONTAINER_THREADS = "container-threads";
 
     private final OptionSet optionSet;
@@ -90,6 +92,8 @@ public class CommandLineOptions implements Options {
 		optionParser.accepts(RECORD_MAPPINGS, "Enable recording of all (non-admin) requests as mapping files");
 		optionParser.accepts(MATCH_HEADERS, "Enable request header matching when recording through a proxy").withRequiredArg();
 		optionParser.accepts(ROOT_DIR, "Specifies path for storing recordings (parent for " + WireMockServer.MAPPINGS_ROOT + " and " + WireMockServer.FILES_ROOT + " folders)").withRequiredArg().defaultsTo(".");
+		optionParser.accepts(EXTRA_BODIES_FOLDER, "Specifies an extra folder to look for expectation bodies.").withRequiredArg();
+		optionParser.accepts(EXTRA_BODIES_FOLDER_2, "Specifies a second extra folder to look for expectation bodies.").withRequiredArg();
 		optionParser.accepts(VERBOSE, "Enable verbose logging to stdout");
 		optionParser.accepts(ENABLE_BROWSER_PROXYING, "Allow wiremock to be set as a browser's proxy server");
         optionParser.accepts(DISABLE_REQUEST_JOURNAL, "Disable the request journal (to avoid heap growth when running wiremock for long periods without reset)");
@@ -132,6 +136,7 @@ public class CommandLineOptions implements Options {
 		return optionSet.has(VERBOSE);
 	}
 	
+	@Override
 	public boolean recordMappingsEnabled() {
 		return optionSet.has(RECORD_MAPPINGS);
 	}
@@ -260,6 +265,26 @@ public class CommandLineOptions implements Options {
     @Override
     public FileSource filesRoot() {
         return new SingleRootFileSource((String) optionSet.valueOf(ROOT_DIR));
+    }
+
+    @Override
+    public boolean hasExtraBodiesFolder() {
+        return optionSet.valueOf(EXTRA_BODIES_FOLDER) != null && !((String) optionSet.valueOf(EXTRA_BODIES_FOLDER)).isEmpty();
+    }
+    
+    @Override
+    public FileSource extraBodiesFolder() {
+        return new SingleRootFileSource((String) optionSet.valueOf(EXTRA_BODIES_FOLDER));
+    }
+
+    @Override
+    public boolean hasExtraBodiesFolder2() {
+        return optionSet.valueOf(EXTRA_BODIES_FOLDER_2) != null && !((String) optionSet.valueOf(EXTRA_BODIES_FOLDER_2)).isEmpty();
+    }
+    
+    @Override
+    public FileSource extraBodiesFolder2() {
+        return new SingleRootFileSource((String) optionSet.valueOf(EXTRA_BODIES_FOLDER_2));
     }
 
     @Override

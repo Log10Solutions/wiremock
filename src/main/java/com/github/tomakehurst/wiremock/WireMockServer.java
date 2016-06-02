@@ -43,6 +43,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMappings;
 import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.github.tomakehurst.wiremock.verification.VerificationResult;
+
 import org.mortbay.log.Log;
 
 import java.util.List;
@@ -91,18 +92,49 @@ public class WireMockServer implements Container, Stubbing, Admin {
                 wireMockApp,
                 new BasicResponseRenderer()
         );
+        
+        StubResponseRenderer stubResponseRenderer = null;
+        if (options.hasExtraBodiesFolder() && options.hasExtraBodiesFolder2()) {
+        	stubResponseRenderer = new StubResponseRenderer(
+	                fileSource.child(FILES_ROOT),
+	                wireMockApp.getGlobalSettingsHolder(),
+	                new ProxyResponseRenderer(
+	                        options.proxyVia(),
+	                        options.httpsSettings().trustStore(),
+	                        options.shouldPreserveHostHeader(),
+	                        options.proxyHostHeader()
+	                ),
+	                options.extraBodiesFolder(), 
+	                options.extraBodiesFolder2()
+	        );
+        } else if (options.hasExtraBodiesFolder()) {
+        	stubResponseRenderer = new StubResponseRenderer(
+	                fileSource.child(FILES_ROOT),
+	                wireMockApp.getGlobalSettingsHolder(),
+	                new ProxyResponseRenderer(
+	                        options.proxyVia(),
+	                        options.httpsSettings().trustStore(),
+	                        options.shouldPreserveHostHeader(),
+	                        options.proxyHostHeader()
+	                ),
+	                options.extraBodiesFolder()
+	        );
+        } else {
+	        stubResponseRenderer = new StubResponseRenderer(
+	                fileSource.child(FILES_ROOT),
+	                wireMockApp.getGlobalSettingsHolder(),
+	                new ProxyResponseRenderer(
+	                        options.proxyVia(),
+	                        options.httpsSettings().trustStore(),
+	                        options.shouldPreserveHostHeader(),
+	                        options.proxyHostHeader()
+	                )
+	        );
+        }
+        
         stubRequestHandler = new StubRequestHandler(
                 wireMockApp,
-                new StubResponseRenderer(
-                        fileSource.child(FILES_ROOT),
-                        wireMockApp.getGlobalSettingsHolder(),
-                        new ProxyResponseRenderer(
-                                options.proxyVia(),
-                                options.httpsSettings().trustStore(),
-                                options.shouldPreserveHostHeader(),
-                                options.proxyHostHeader()
-                        )
-                )
+                stubResponseRenderer
         );
         HttpServerFactory httpServerFactory = new Jetty6HttpServerFactory();
         httpServer = httpServerFactory.buildHttpServer(

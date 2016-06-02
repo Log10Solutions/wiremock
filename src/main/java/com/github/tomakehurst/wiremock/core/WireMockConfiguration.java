@@ -49,6 +49,8 @@ public class WireMockConfiguration implements Options {
     private boolean browserProxyingEnabled = false;
     private ProxySettings proxySettings = ProxySettings.NO_PROXY;
     private FileSource filesRoot = new SingleRootFileSource("src/test/resources");
+    private FileSource extraBodiesFolder = null;
+    private FileSource extraBodiesFolder2 = null;
     private Notifier notifier = new Slf4jNotifier(false);
     private boolean requestJournalDisabled = false;
     private Optional<Integer> maxRequestJournalEntries = Optional.absent();
@@ -59,6 +61,7 @@ public class WireMockConfiguration implements Options {
     private Integer jettyAcceptors;
     private Integer jettyAcceptQueueSize;
     private Integer jettyHeaderBufferSize;
+    private boolean isRecording = false;
 
     private Map<String, Extension> extensions = newLinkedHashMap();
 
@@ -151,6 +154,16 @@ public class WireMockConfiguration implements Options {
         return this;
     }
 
+    public WireMockConfiguration extraBodiesFolderWithRootDirectory(String path) {
+        this.extraBodiesFolder = new SingleRootFileSource(path);
+        return this;
+    }
+
+    public WireMockConfiguration extraBodiesFolder2WithRootDirectory(String path) {
+        this.extraBodiesFolder2 = new SingleRootFileSource(path);
+        return this;
+    }
+
     public WireMockConfiguration usingFilesUnderDirectory(String path) {
         return withRootDirectory(path);
     }
@@ -160,8 +173,28 @@ public class WireMockConfiguration implements Options {
         return this;
     }
 
+    public WireMockConfiguration extraBodiesFolderUsingFilesUnderClasspath(String path) {
+        this.extraBodiesFolder = new ClasspathFileSource(path);
+        return this;
+    }
+
+    public WireMockConfiguration extraBodiesFolder2UsingFilesUnderClasspath(String path) {
+        this.extraBodiesFolder2 = new ClasspathFileSource(path);
+        return this;
+    }
+
     public WireMockConfiguration fileSource(FileSource fileSource) {
         this.filesRoot = fileSource;
+        return this;
+    }
+
+    public WireMockConfiguration extraBodiesFolderSource(FileSource source) {
+        this.extraBodiesFolder = source;
+        return this;
+    }
+
+    public WireMockConfiguration extraBodiesFolder2Source(FileSource source) {
+        this.extraBodiesFolder2 = source;
         return this;
     }
 
@@ -212,6 +245,11 @@ public class WireMockConfiguration implements Options {
 
     public WireMockConfiguration extensions(Class<? extends Extension>... classes) {
         extensions.putAll(ExtensionLoader.load(classes));
+        return this;
+    }
+    
+    public WireMockConfiguration isRecording(boolean isRecording) {
+        this.isRecording = isRecording;
         return this;
     }
 
@@ -305,4 +343,29 @@ public class WireMockConfiguration implements Options {
             }
         });
     }
+
+	@Override
+	public FileSource extraBodiesFolder() {
+		return extraBodiesFolder;
+	}
+
+	@Override
+	public boolean hasExtraBodiesFolder() {
+		return extraBodiesFolder != null;
+	}
+
+	@Override
+	public FileSource extraBodiesFolder2() {
+		return extraBodiesFolder2;
+	}
+
+	@Override
+	public boolean hasExtraBodiesFolder2() {
+		return extraBodiesFolder2 != null;
+	}
+
+	@Override
+	public boolean recordMappingsEnabled() {
+		return isRecording;
+	}
 }

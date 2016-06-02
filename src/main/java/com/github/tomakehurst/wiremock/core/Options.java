@@ -45,4 +45,9 @@ public interface Options {
     public boolean shouldPreserveHostHeader();
     String proxyHostHeader();
     <T extends Extension> Map<String, T> extensionsOfType(Class<T> extensionType);
+	FileSource extraBodiesFolder();
+	boolean hasExtraBodiesFolder();
+	FileSource extraBodiesFolder2();
+	boolean hasExtraBodiesFolder2();
+	boolean recordMappingsEnabled();
 }
