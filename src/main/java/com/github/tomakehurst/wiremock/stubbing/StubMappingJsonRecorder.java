@@ -15,23 +15,27 @@
  */
 package com.github.tomakehurst.wiremock.stubbing;
 
+import static com.github.tomakehurst.wiremock.common.Json.write;
+import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
+import static java.util.Arrays.asList;
+import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT;
+
+import java.util.List;
+
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.common.IdGenerator;
 import com.github.tomakehurst.wiremock.common.UniqueFilenameGenerator;
 import com.github.tomakehurst.wiremock.common.VeryShortIdGenerator;
 import com.github.tomakehurst.wiremock.core.Admin;
-import com.github.tomakehurst.wiremock.http.*;
+import com.github.tomakehurst.wiremock.http.CaseInsensitiveKey;
+import com.github.tomakehurst.wiremock.http.HttpHeader;
+import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.RequestListener;
+import com.github.tomakehurst.wiremock.http.Response;
+import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.matching.ValuePattern;
 import com.github.tomakehurst.wiremock.verification.VerificationResult;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import java.util.List;
-
-import static com.github.tomakehurst.wiremock.common.Json.write;
-import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
-import static java.util.Arrays.asList;
-import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT;
 
 public class StubMappingJsonRecorder implements RequestListener {
 
@@ -95,8 +99,20 @@ public class StubMappingJsonRecorder implements RequestListener {
 
     private void writeToMappingAndBodyFile(Request request, Response response, RequestPattern requestPattern) {
         String fileId = idGenerator.generate();
-        String mappingFileName = UniqueFilenameGenerator.generate(request, "mapping", fileId);
-        String bodyFileName = UniqueFilenameGenerator.generate(request, "body", fileId);
+        
+        HttpHeader headerContentType = response.getHeaders().getHeader("Content-Type");
+        String[] contentTypes = {"json", "xml", "html", "javascript", "png", "gif", "jpeg", "bmp", "text/plain", "pdf"};
+        String[] extsForTypes = {"json", "xml", "html", "js", "png", "gif", "jpeg", "bmp", "txt", "pdf"};
+        String ext = "file";
+        for (int i = 0; i < contentTypes.length; i++) {
+			if (headerContentType.hasValueMatching(ValuePattern.containing(contentTypes[i]))) {
+				ext = extsForTypes[i];
+		        break;
+			}
+		}
+        
+        String mappingFileName = UniqueFilenameGenerator.generate(request, "", fileId, "json");
+        String bodyFileName = UniqueFilenameGenerator.generate(request, "body-", fileId, ext);
         ResponseDefinition responseToWrite = new ResponseDefinition();
         responseToWrite.setStatus(response.getStatus());
         responseToWrite.setBodyFileName(bodyFileName);

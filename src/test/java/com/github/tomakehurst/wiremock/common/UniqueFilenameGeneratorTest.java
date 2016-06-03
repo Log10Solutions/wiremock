@@ -40,7 +40,8 @@ public class UniqueFilenameGeneratorTest {
         String fileName = UniqueFilenameGenerator.generate(
                 aRequest(context).withUrl("/some/path").build(),
                 "body",
-                "random123");
+                "random123",
+                "json");
 
         assertThat(fileName, is("body-some-path-random123.json"));
     }
@@ -50,7 +51,8 @@ public class UniqueFilenameGeneratorTest {
         String fileName = UniqueFilenameGenerator.generate(
                 aRequest(context).withUrl("/thing").build(),
                 "body",
-                "random123");
+                "random123",
+                "json");
 
         assertThat(fileName, is("body-thing-random123.json"));
     }
@@ -60,7 +62,8 @@ public class UniqueFilenameGeneratorTest {
         String fileName = UniqueFilenameGenerator.generate(
                 aRequest(context).withUrl("/").build(),
                 "body",
-                "random123");
+                "random123",
+                "json");
 
         assertThat(fileName, is("body-(root)-random123.json"));
     }

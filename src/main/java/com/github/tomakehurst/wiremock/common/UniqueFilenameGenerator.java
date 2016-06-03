@@ -15,21 +15,18 @@
  */
 package com.github.tomakehurst.wiremock.common;
 
-import com.github.tomakehurst.wiremock.http.Request;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
-
-import java.net.URI;
-
 import static com.google.common.base.Splitter.on;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Iterables.size;
 import static java.lang.Math.min;
 
+import java.net.URI;
+
+import com.github.tomakehurst.wiremock.http.Request;
+import com.google.common.base.Joiner;
+
 public class UniqueFilenameGenerator {
-    public static String generate(Request request, String prefix, String id) {
+    public static String generate(Request request, String prefix, String id, String ext) {
         URI uri = URI.create(request.getUrl());
         Iterable<String> uriPathNodes = on("/").omitEmptyStrings().split(uri.getPath());
         int nodeCount = size(uriPathNodes);
@@ -40,11 +37,11 @@ public class UniqueFilenameGenerator {
 
 
         return new StringBuilder(prefix)
-                .append("-")
                 .append(pathPart)
                 .append("-")
                 .append(id)
-                .append(".json")
+                .append(".")
+                .append(ext)
                 .toString();
     }
 }
