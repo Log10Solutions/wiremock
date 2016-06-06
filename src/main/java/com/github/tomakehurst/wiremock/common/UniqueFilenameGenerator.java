@@ -26,7 +26,7 @@ import com.github.tomakehurst.wiremock.http.Request;
 import com.google.common.base.Joiner;
 
 public class UniqueFilenameGenerator {
-    public static String generate(Request request, String prefix, String id, String ext) {
+    public static String generate(Request request, String prefix, String timestampInMs, String id, String ext) {
         URI uri = URI.create(request.getUrl());
         Iterable<String> uriPathNodes = on("/").omitEmptyStrings().split(uri.getPath());
         int nodeCount = size(uriPathNodes);
@@ -38,6 +38,8 @@ public class UniqueFilenameGenerator {
 
         return new StringBuilder(prefix)
                 .append(pathPart)
+                .append("-")
+                .append(timestampInMs)
                 .append("-")
                 .append(id)
                 .append(".")

@@ -20,6 +20,7 @@ import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
 import static java.util.Arrays.asList;
 import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT;
 
+import java.util.Calendar;
 import java.util.List;
 
 import com.github.tomakehurst.wiremock.common.FileSource;
@@ -56,7 +57,6 @@ public class StubMappingJsonRecorder implements RequestListener {
     @Override
     public void requestReceived(Request request, Response response) {
         RequestPattern requestPattern = buildRequestPatternFrom(request);
-
         if (requestNotAlreadyReceived(requestPattern) && response.isFromProxy()) {
             notifier().info(String.format("Recording mappings for %s", request.getUrl()));
             writeToMappingAndBodyFile(request, response, requestPattern);
@@ -110,9 +110,9 @@ public class StubMappingJsonRecorder implements RequestListener {
 		        break;
 			}
 		}
-        
-        String mappingFileName = UniqueFilenameGenerator.generate(request, "", fileId, "json");
-        String bodyFileName = UniqueFilenameGenerator.generate(request, "body-", fileId, ext);
+        String timestamp = String.valueOf(Calendar.getInstance().getTimeInMillis());
+        String mappingFileName = UniqueFilenameGenerator.generate(request, "", timestamp, fileId, "json");
+        String bodyFileName = UniqueFilenameGenerator.generate(request, "body-", timestamp, fileId, ext);
         ResponseDefinition responseToWrite = new ResponseDefinition();
         responseToWrite.setStatus(response.getStatus());
         responseToWrite.setBodyFileName(bodyFileName);
