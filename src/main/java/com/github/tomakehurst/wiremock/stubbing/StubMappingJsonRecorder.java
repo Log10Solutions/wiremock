@@ -20,6 +20,12 @@ import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
 import static java.util.Arrays.asList;
 import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.Calendar;
 import java.util.List;
 
@@ -110,7 +116,8 @@ public class StubMappingJsonRecorder implements RequestListener {
 		        break;
 			}
 		}
-        String timestamp = String.valueOf(Calendar.getInstance().getTimeInMillis());
+        long timestampAsLong = Calendar.getInstance().getTimeInMillis();
+        String timestamp = String.valueOf(timestampAsLong);
         String mappingFileName = UniqueFilenameGenerator.generate(request, "", timestamp, fileId, "json");
         String bodyFileName = UniqueFilenameGenerator.generate(request, "body-", timestamp, fileId, ext);
         ResponseDefinition responseToWrite = new ResponseDefinition();
@@ -123,10 +130,20 @@ public class StubMappingJsonRecorder implements RequestListener {
 
         StubMapping mapping = new StubMapping(requestPattern, responseToWrite);
 
-        filesFileSource.writeBinaryFile(bodyFileName, response.getBody());
-        mappingsFileSource.writeTextFile(mappingFileName, write(mapping));
+        File bodyFile = filesFileSource.writeBinaryFile(bodyFileName, response.getBody());
+        File expectationFile = mappingsFileSource.writeTextFile(mappingFileName, write(mapping));
+        setTimesOnFile(bodyFile, timestampAsLong);
+        setTimesOnFile(expectationFile, timestampAsLong);
     }
-
+    
+    private void setTimesOnFile(File file, Long timestampInMillis) {
+    	BasicFileAttributeView attributes = Files.getFileAttributeView(file.toPath(), BasicFileAttributeView.class);
+        FileTime timestamAsFileTime = FileTime.fromMillis(timestampInMillis);
+        try {
+        	attributes.setTimes(timestamAsFileTime, timestamAsFileTime, timestamAsFileTime);
+		} catch (IOException e) {}
+    }
+    
     private boolean requestNotAlreadyReceived(RequestPattern requestPattern) {
         VerificationResult verificationResult = admin.countRequestsMatching(requestPattern);
         verificationResult.assertRequestJournalEnabled();

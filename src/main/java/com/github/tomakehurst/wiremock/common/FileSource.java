@@ -15,6 +15,7 @@
  */
 package com.github.tomakehurst.wiremock.common;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -25,7 +26,7 @@ public interface FileSource {
 	FileSource child(String subDirectoryName);
 	String getPath();
 	List<TextFile> listFilesRecursively();
-	void writeTextFile(String name, String contents);
-    void writeBinaryFile(String name, byte[] contents);
+	File writeTextFile(String name, String contents);
+    File writeBinaryFile(String name, byte[] contents);
     boolean exists();
 }

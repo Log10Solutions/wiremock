@@ -15,11 +15,14 @@
  */
 package com.github.tomakehurst.wiremock.common;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterators;
-import com.google.common.io.Resources;
+import static com.github.tomakehurst.wiremock.common.Exceptions.throwUnchecked;
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Iterators.find;
+import static com.google.common.collect.Iterators.forEnumeration;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Thread.currentThread;
+import static java.util.Arrays.asList;
 
 import java.io.File;
 import java.net.URI;
@@ -31,14 +34,11 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static com.github.tomakehurst.wiremock.common.Exceptions.throwUnchecked;
-import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Iterators.find;
-import static com.google.common.collect.Iterators.forEnumeration;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.Thread.currentThread;
-import static java.util.Arrays.asList;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterators;
+import com.google.common.io.Resources;
 
 public class ClasspathFileSource implements FileSource {
 
@@ -158,12 +158,12 @@ public class ClasspathFileSource implements FileSource {
     }
 
     @Override
-    public void writeTextFile(String name, String contents) {
+    public File writeTextFile(String name, String contents) {
         throw new UnsupportedOperationException("Classpath file sources are read-only");
     }
 
     @Override
-    public void writeBinaryFile(String name, byte[] contents) {
+    public File writeBinaryFile(String name, byte[] contents) {
         throw new UnsupportedOperationException("Classpath file sources are read-only");
     }
 

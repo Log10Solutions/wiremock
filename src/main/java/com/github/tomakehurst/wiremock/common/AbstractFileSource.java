@@ -15,18 +15,17 @@
  */
 package com.github.tomakehurst.wiremock.common;
 
-import com.google.common.base.Function;
-import com.google.common.io.Files;
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.List;
 
-import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Arrays.asList;
+import com.google.common.base.Function;
+import com.google.common.io.Files;
 
 public abstract class AbstractFileSource implements FileSource {
 
@@ -86,13 +85,17 @@ public abstract class AbstractFileSource implements FileSource {
     }
 
     @Override
-    public void writeTextFile(String name, String contents) {
-    	writeTextFileAndTranslateExceptions(contents, writableFileFor(name));
+    public File writeTextFile(String name, String contents) {
+    	File newFile = writableFileFor(name);
+    	writeTextFileAndTranslateExceptions(contents, newFile);
+    	return newFile;
     }
 
     @Override
-    public void writeBinaryFile(String name, byte[] contents) {
-        writeBinaryFileAndTranslateExceptions(contents, writableFileFor(name));
+    public File writeBinaryFile(String name, byte[] contents) {
+    	File newFile = writableFileFor(name);
+        writeBinaryFileAndTranslateExceptions(contents, newFile);
+        return newFile;
     }
 
     @Override
