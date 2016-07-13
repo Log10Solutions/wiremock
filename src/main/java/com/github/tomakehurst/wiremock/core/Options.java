@@ -50,4 +50,8 @@ public interface Options {
 	FileSource extraBodiesFolder2();
 	boolean hasExtraBodiesFolder2();
 	boolean recordMappingsEnabled();
+	public String getHttpProxyHost();
+	public String getHttpProxyPort();
+	public String getHttpsProxyHost();
+	public String getHttpsProxyPort();
 }

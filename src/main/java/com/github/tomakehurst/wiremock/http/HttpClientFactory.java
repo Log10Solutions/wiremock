@@ -17,6 +17,7 @@ package com.github.tomakehurst.wiremock.http;
 
 import com.github.tomakehurst.wiremock.common.KeyStoreSettings;
 import com.github.tomakehurst.wiremock.common.ProxySettings;
+
 import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.config.SocketConfig;
@@ -24,12 +25,17 @@ import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.protocol.HttpProcessorBuilder;
 
 import javax.net.ssl.SSLContext;
+
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import static com.github.tomakehurst.wiremock.common.Exceptions.throwUnchecked;
 import static com.github.tomakehurst.wiremock.common.KeyStoreSettings.NO_STORE;
@@ -48,12 +54,16 @@ public class HttpClientFactory {
                 .disableCookieManagement()
                 .disableRedirectHandling()
                 .disableContentCompression()
+//                .setRoutePlanner(new DefaultProxyRoutePlanner(new HttpHost("w3schools.com", 80, "http")))
                 .setMaxConnTotal(maxConnections)
                 .setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(timeoutMilliseconds).build())
                 .setHostnameVerifier(new AllowAllHostnameVerifier());
 
         if (proxySettings != NO_PROXY) {
             HttpHost proxyHost = new HttpHost(proxySettings.host(), proxySettings.port());
+            builder.setProxy(proxyHost);
+        } else {
+        	HttpHost proxyHost = new HttpHost("w3schools.com", 80);
             builder.setProxy(proxyHost);
         }
 
@@ -82,6 +92,13 @@ public class HttpClientFactory {
     private static SSLContext buildAllowAnythingSSLContext() {
         try {
             return SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
+//            return SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
+//				
+//				@Override
+//				public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+//					return true;
+//				}
+//			}).build();
         } catch (Exception e) {
             return throwUnchecked(e, SSLContext.class);
         }

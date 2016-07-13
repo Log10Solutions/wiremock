@@ -15,15 +15,17 @@
  */
 package com.github.tomakehurst.wiremock.http;
 
-import com.github.tomakehurst.wiremock.common.KeyStoreSettings;
-import com.github.tomakehurst.wiremock.common.ProxySettings;
-import com.google.common.collect.ImmutableList;
-import org.apache.http.*;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.entity.ByteArrayEntity;
+import static com.github.tomakehurst.wiremock.common.HttpClientUtils.getEntityAsByteArrayAndCloseStream;
+import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.DELETE;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.GET;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.HEAD;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.OPTIONS;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.PATCH;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.POST;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.PUT;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.TRACE;
+import static com.github.tomakehurst.wiremock.http.Response.response;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,17 +34,28 @@ import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.common.HttpClientUtils.getEntityAsByteArrayAndCloseStream;
-import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.DELETE;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.GET;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.HEAD;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.OPTIONS;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.POST;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.PUT;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.PATCH;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.TRACE;
-import static com.github.tomakehurst.wiremock.http.Response.response;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpOptions;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpTrace;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
+
+import com.github.tomakehurst.wiremock.common.KeyStoreSettings;
+import com.github.tomakehurst.wiremock.common.ProxySettings;
+import com.google.common.collect.ImmutableList;
 
 public class ProxyResponseRenderer implements ResponseRenderer {
 
@@ -74,7 +87,7 @@ public class ProxyResponseRenderer implements ResponseRenderer {
 		try {
 			addBodyIfPostPutOrPatch(httpRequest, responseDefinition);
 			HttpResponse httpResponse = client.execute(httpRequest);
-
+			
             return response()
                     .status(httpResponse.getStatusLine().getStatusCode())
                     .headers(headersFrom(httpResponse, responseDefinition))

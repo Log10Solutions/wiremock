@@ -51,6 +51,10 @@ public class WireMockConfiguration implements Options {
     private FileSource filesRoot = new SingleRootFileSource("src/test/resources");
     private FileSource extraBodiesFolder = null;
     private FileSource extraBodiesFolder2 = null;
+    private String httpProxyHost = null;
+    private String httpProxyPort = null;
+    private String httpsProxyHost = null;
+    private String httpsProxyPort = null;
     private Notifier notifier = new Slf4jNotifier(false);
     private boolean requestJournalDisabled = false;
     private Optional<Integer> maxRequestJournalEntries = Optional.absent();
@@ -367,5 +371,25 @@ public class WireMockConfiguration implements Options {
 	@Override
 	public boolean recordMappingsEnabled() {
 		return isRecording;
+	}
+
+	@Override
+	public String getHttpProxyHost() {
+		return httpProxyHost;
+	}
+
+	@Override
+	public String getHttpProxyPort() {
+		return httpProxyPort;
+	}
+
+	@Override
+	public String getHttpsProxyHost() {
+		return httpsProxyHost;
+	}
+
+	@Override
+	public String getHttpsProxyPort() {
+		return httpsProxyPort;
 	}
 }

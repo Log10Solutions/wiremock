@@ -71,6 +71,10 @@ public class CommandLineOptions implements Options {
     private static final String EXTRA_BODIES_FOLDER = "extra-bodies-folder";
     private static final String EXTRA_BODIES_FOLDER_2 = "extra-bodies-folder-2";
     private static final String CONTAINER_THREADS = "container-threads";
+    private static final String HTTP_PROXY_HOST = "http-proxy-host";
+    private static final String HTTP_PROXY_PORT = "http-proxy-port";
+    private static final String HTTPS_PROXY_HOST = "https-proxy-host";
+    private static final String HTTPS_PROXY_PORT = "https-proxy-port";
 
     private final OptionSet optionSet;
 	private String helpText;
@@ -102,6 +106,10 @@ public class CommandLineOptions implements Options {
         optionParser.accepts(JETTY_ACCEPTOR_THREAD_COUNT, "Number of Jetty acceptor threads").withRequiredArg();
         optionParser.accepts(JETTY_ACCEPT_QUEUE_SIZE, "The size of Jetty's accept queue size").withRequiredArg();
         optionParser.accepts(JETTY_HEADER_BUFFER_SIZE, "The size of Jetty's buffer for request headers").withRequiredArg();
+        optionParser.accepts(HTTP_PROXY_HOST, "The http proxy host that this server will use").withRequiredArg();
+        optionParser.accepts(HTTP_PROXY_PORT, "The http proxy port that this server will use").withRequiredArg();
+        optionParser.accepts(HTTPS_PROXY_HOST, "The https proxy host that this server will use").withRequiredArg();
+        optionParser.accepts(HTTPS_PROXY_PORT, "The https proxy port that this server will use").withRequiredArg();
         optionParser.accepts(HELP, "Print this message");
 		
 		optionSet = optionParser.parse(args);
@@ -286,7 +294,27 @@ public class CommandLineOptions implements Options {
     public FileSource extraBodiesFolder2() {
         return new SingleRootFileSource((String) optionSet.valueOf(EXTRA_BODIES_FOLDER_2));
     }
-
+    
+    @Override
+    public String getHttpProxyHost() {
+    	return (String) optionSet.valueOf(HTTP_PROXY_HOST);
+    }
+    
+    @Override
+    public String getHttpProxyPort() {
+    	return (String) optionSet.valueOf(HTTP_PROXY_PORT);
+    }
+    
+    @Override
+    public String getHttpsProxyHost() {
+    	return (String) optionSet.valueOf(HTTPS_PROXY_HOST);
+    }
+    
+    @Override
+    public String getHttpsProxyPort() {
+    	return (String) optionSet.valueOf(HTTPS_PROXY_PORT);
+    }
+    
     @Override
     public Notifier notifier() {
         return new ConsoleNotifier(verboseLoggingEnabled());

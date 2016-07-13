@@ -84,12 +84,14 @@ class Jetty6HttpServer implements HttpServer {
         Notifier notifier = options.notifier();
         addAdminContext(
                 adminRequestHandler,
-                notifier
+                notifier, 
+                options
         );
         addMockServiceContext(
                 stubRequestHandler,
                 options.filesRoot(),
-                notifier
+                notifier, 
+                options
         );
     }
 
@@ -189,7 +191,8 @@ class Jetty6HttpServer implements HttpServer {
     private void addMockServiceContext(
             StubRequestHandler stubRequestHandler,
             FileSource fileSource,
-            Notifier notifier
+            Notifier notifier,
+            Options options
     ) {
         Context mockServiceContext = new Context(jettyServer, "/");
 
@@ -206,6 +209,10 @@ class Jetty6HttpServer implements HttpServer {
         ServletHolder servletHolder = mockServiceContext.addServlet(Jetty6HandlerDispatchingServlet.class, "/");
         servletHolder.setInitParameter(RequestHandler.HANDLER_CLASS_KEY, StubRequestHandler.class.getName());
         servletHolder.setInitParameter(SHOULD_FORWARD_TO_FILES_CONTEXT, "true");
+        servletHolder.setInitParameter("http-proxy-host", options.getHttpProxyHost());
+        servletHolder.setInitParameter("http-proxy-port", options.getHttpProxyPort());
+        servletHolder.setInitParameter("https-proxy-host", options.getHttpsProxyHost());
+        servletHolder.setInitParameter("https-proxy-port", options.getHttpsProxyPort());
 
         MimeTypes mimeTypes = new MimeTypes();
         mimeTypes.addMimeMapping("json", "application/json");
@@ -224,11 +231,17 @@ class Jetty6HttpServer implements HttpServer {
 
     private void addAdminContext(
             AdminRequestHandler adminRequestHandler,
-            Notifier notifier
+            Notifier notifier,
+            Options options
     ) {
         Context adminContext = new Context(jettyServer, ADMIN_CONTEXT_ROOT);
         ServletHolder servletHolder = adminContext.addServlet(Jetty6HandlerDispatchingServlet.class, "/");
         servletHolder.setInitParameter(RequestHandler.HANDLER_CLASS_KEY, AdminRequestHandler.class.getName());
+        servletHolder.setInitParameter("http-proxy-host", options.getHttpProxyHost());
+        servletHolder.setInitParameter("http-proxy-port", options.getHttpProxyPort());
+        servletHolder.setInitParameter("https-proxy-host", options.getHttpsProxyHost());
+        servletHolder.setInitParameter("https-proxy-port", options.getHttpsProxyPort());
+
         adminContext.setAttribute(AdminRequestHandler.class.getName(), adminRequestHandler);
         adminContext.setAttribute(Notifier.KEY, notifier);
         jettyServer.addHandler(adminContext);

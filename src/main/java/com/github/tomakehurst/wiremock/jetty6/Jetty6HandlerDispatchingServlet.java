@@ -31,6 +31,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 import static com.github.tomakehurst.wiremock.http.RequestMethod.GET;
@@ -42,6 +43,7 @@ public class Jetty6HandlerDispatchingServlet extends HttpServlet {
 
 	public static final String SHOULD_FORWARD_TO_FILES_CONTEXT = "shouldForwardToFilesContext";
 	public static final String MAPPED_UNDER_KEY = "mappedUnder";
+	public static final String OPTIONS_KEY = "options";
 
 	private static final long serialVersionUID = -6602042274260495538L;
 	
@@ -50,9 +52,22 @@ public class Jetty6HandlerDispatchingServlet extends HttpServlet {
 	private Notifier notifier;
 	private String wiremockFileSourceRoot = "/";
 	private boolean shouldForwardToFilesContext;
+	private String httpProxyHost;
+	private String httpProxyPort;
+	private String httpsProxyHost;
+	private String httpsProxyPort;
+	private String defaultHttpProxyHost;
+	private String defaultHttpProxyPort;
+	private String defaultHttpsProxyHost;
+	private String defaultHttpsProxyPort;
 	
 	@Override
 	public void init(ServletConfig config) {
+		httpProxyHost = config.getInitParameter("http-proxy-host");
+		httpProxyPort = config.getInitParameter("http-proxy-port");
+		httpsProxyHost = config.getInitParameter("https-proxy-host");
+		httpsProxyPort = config.getInitParameter("https-proxy-port");
+		
 	    ServletContext context = config.getServletContext();
 	    shouldForwardToFilesContext = getFileContextForwardingFlagFrom(config);
 	    
@@ -95,18 +110,67 @@ public class Jetty6HandlerDispatchingServlet extends HttpServlet {
 		Request request = new Jetty6HttpServletRequestAdapter(httpServletRequest, mappedUnder);
         notifier.info("Received request: " + httpServletRequest.toString());
 
-		Response response = requestHandler.handle(request);
-        if (Thread.currentThread().isInterrupted()) {
-            return;
+        addProxyIfNecessary();
+        try {
+			Response response = requestHandler.handle(request);
+	        if (Thread.currentThread().isInterrupted()) {
+	            return;
+	        }
+			if (response.wasConfigured()) {
+			    applyResponse(response, httpServletResponse);
+			} else if (request.getMethod().equals(GET) && shouldForwardToFilesContext) {
+			    forwardToFilesContext(httpServletRequest, httpServletResponse, request);
+			} else {
+				httpServletResponse.sendError(HTTP_NOT_FOUND);
+			}
+        } catch (IOException e) {
+        	removeProxyIfNecessary();
+        	throw e;
+        } catch (ServletException e) {
+        	removeProxyIfNecessary();
+        	throw e;
         }
-		if (response.wasConfigured()) {
-		    applyResponse(response, httpServletResponse);
-		} else if (request.getMethod().equals(GET) && shouldForwardToFilesContext) {
-		    forwardToFilesContext(httpServletRequest, httpServletResponse, request);
-		} else {
-			httpServletResponse.sendError(HTTP_NOT_FOUND);
+        removeProxyIfNecessary();
+	}
+	
+	private void removeProxyIfNecessary() {
+		if (hasHttpProxy()) {
+			System.out.println("Reset http proxy on wiremock: " + defaultHttpProxyHost + ", " + defaultHttpProxyPort);
+			System.setProperty("http.proxyHost", defaultHttpProxyHost);
+			System.setProperty("http.proxyPort", defaultHttpProxyPort);
+		}
+		if (hasHttpsProxy()) {
+			System.out.println("Reset https proxy on wiremock: " + defaultHttpsProxyHost + ", " + defaultHttpsProxyPort);
+			System.setProperty("https.proxyHost", defaultHttpsProxyHost);
+			System.setProperty("https.proxyPort", defaultHttpsProxyPort);
 		}
 	}
+	
+	private void addProxyIfNecessary() {
+		defaultHttpProxyHost = System.getProperty("http.proxyHost");
+		defaultHttpProxyPort = System.getProperty("http.proxyPort");
+		defaultHttpsProxyHost = System.getProperty("https.proxyHost");
+		defaultHttpsProxyPort = System.getProperty("https.proxyPort");
+		if (hasHttpProxy()) {
+			System.out.println("Setup http proxy on wiremock: " + httpProxyHost + ", " + httpProxyPort);
+			System.setProperty("http.proxyHost", httpProxyHost);
+			System.setProperty("http.proxyPort", httpProxyPort);
+		}
+		if (hasHttpsProxy()) {
+			System.out.println("Setup https proxy on wiremock: " + httpsProxyHost + ", " + httpsProxyPort);
+			System.setProperty("https.proxyHost", httpsProxyHost);
+			System.setProperty("https.proxyPort", httpsProxyPort);
+		}
+	}
+	
+	private boolean hasHttpProxy() {
+		return (httpProxyHost != null && !httpProxyHost.isEmpty() && httpProxyPort != null && !httpProxyPort.isEmpty());
+	}
+	
+	private boolean hasHttpsProxy() {
+		return (httpsProxyHost != null && !httpsProxyHost.isEmpty() && httpsProxyPort != null && !httpsProxyPort.isEmpty());
+	}
+
 
     public static void applyResponse(Response response, HttpServletResponse httpServletResponse) {
         if (response.getFault() != null) {

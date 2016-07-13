@@ -15,6 +15,13 @@
  */
 package com.github.tomakehurst.wiremock;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static com.google.common.base.Preconditions.checkState;
+
+import java.util.List;
+
+import org.mortbay.log.Log;
+
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.client.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -27,8 +34,19 @@ import com.github.tomakehurst.wiremock.core.Container;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockApp;
 import com.github.tomakehurst.wiremock.extension.ResponseTransformer;
-import com.github.tomakehurst.wiremock.global.*;
-import com.github.tomakehurst.wiremock.http.*;
+import com.github.tomakehurst.wiremock.global.GlobalSettings;
+import com.github.tomakehurst.wiremock.global.GlobalSettingsHolder;
+import com.github.tomakehurst.wiremock.global.RequestDelayControl;
+import com.github.tomakehurst.wiremock.global.RequestDelaySpec;
+import com.github.tomakehurst.wiremock.global.ThreadSafeRequestDelayControl;
+import com.github.tomakehurst.wiremock.http.AdminRequestHandler;
+import com.github.tomakehurst.wiremock.http.BasicResponseRenderer;
+import com.github.tomakehurst.wiremock.http.HttpServer;
+import com.github.tomakehurst.wiremock.http.HttpServerFactory;
+import com.github.tomakehurst.wiremock.http.ProxyResponseRenderer;
+import com.github.tomakehurst.wiremock.http.RequestListener;
+import com.github.tomakehurst.wiremock.http.StubRequestHandler;
+import com.github.tomakehurst.wiremock.http.StubResponseRenderer;
 import com.github.tomakehurst.wiremock.jetty6.Jetty6HttpServerFactory;
 import com.github.tomakehurst.wiremock.jetty6.LoggerAdapter;
 import com.github.tomakehurst.wiremock.junit.Stubbing;
@@ -43,13 +61,6 @@ import com.github.tomakehurst.wiremock.stubbing.StubMappings;
 import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.github.tomakehurst.wiremock.verification.VerificationResult;
-
-import org.mortbay.log.Log;
-
-import java.util.List;
-
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static com.google.common.base.Preconditions.checkState;
 
 public class WireMockServer implements Container, Stubbing, Admin {
 
@@ -87,7 +98,7 @@ public class WireMockServer implements Container, Stubbing, Admin {
                 fileSource,
                 this
         );
-
+        
         AdminRequestHandler adminRequestHandler = new AdminRequestHandler(
                 wireMockApp,
                 new BasicResponseRenderer()
